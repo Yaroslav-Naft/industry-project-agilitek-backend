@@ -1,51 +1,35 @@
-`drop table if exists workflow_logs, contact_workflows, user_workflow, workflows, users;
-
-create table users(
-	id serial primary key not null
-	salesforce_id VARCHAR(18),
-	first_name varchar(250),
-	last_name varchar(250)
-);
+`drop table if exists workflow_logs, contact_workflows, workflows;
 
 create table workflows(
-	id serial primary key,
-	user_id varchar(18),
-	flow_url varchar(250),
-	sql_query varchar(250),
-	active boolean,
-	constraint fk_user
-		foreign key(user_id)
-			references users(id)
-);
-
-create table user_workflows(
-	user_id int,
-	workflow_id int,
-	constraint fk_user
-		foreign key(user_id)
-			references users(id)
-	constraint fk_workflow
-		foreign key(workflow_id)
-			references(id)
+	id serial primary key not null,
+	flow_url text not null,
+	"name" text,
+	description text,
+	"table" text not null,
+	"column" text,
+	"label" text,
+	"type" text not null,
+	sobject_type text,
+	where_clause text not null,
+	"mapping" json,
+	run_again boolean not null,
+	active boolean not null
 );
 
 create table contact_workflows(
-	workflow_id int,
-	contact_id VARCHAR(18),
-	constraint fk_workflow,
+	workflow_id int not null,
+	contact_id varchar(18) not null,
+	constraint fk_workflow
 		foreign key(workflow_id)
 			references workflows(id) on delete cascade,
-	constraint fk_contact
-		foreign key(contact_id)
-			references "SalesforceContacts"(id)
 );
 
 create table workflow_logs(
 	id serial primary key not null,
 	workflow_id int not null,
-	action_name varchar,
-	time_of_completion timestamp,
-	record_id varchar,
+	action_name text,
+	time_of_completion timestamp not null,
+	is_flow_successful boolean,
 	constraint fk_workflow
 		foreign key(workflow_id)
 			references workflows(id) on delete cascade
