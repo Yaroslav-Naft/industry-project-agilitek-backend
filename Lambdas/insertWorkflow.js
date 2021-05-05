@@ -2,19 +2,40 @@ const { Client } = require('pg');
 const { dbConfig } = require('/opt/config');
 
 exports.handler = (event, context, callback) => {
-    
-    const body = JSON.parse(event.body)
     const query =
         `
-        UPDATE workflows 
-        SET 
-            name = '${body.name}',
-            flow_url = '${body.flowUrl}',
-            sql_query = '${body.query}',
-            description = '${body.desc}',
-            active = ${body.active}
-        WHERE id = ${event.pathParameters.id};
+        insert into workflows
+        (
+            name,
+            description,
+            flow_url,
+            "table",
+            "column",
+            "label",
+            "type",
+            sobject_type,
+            where_clause,
+            "mapping",
+            active,
+            run_again
+        )
+        values
+        (
+            '${event.name}',
+            '${event.desc}',
+            '${event.flowUrl}',
+            '${event.table}',
+            '${event.column}',
+            '${event.label}',
+            '${event.type}',
+            '${event.sObjectType}',
+            '${event.whereClause}',
+            '${JSON.stringify(event.mapping)}',
+            ${event.active},
+            ${event.runAgain}
+        );
         `;
+    
 
     const client = new Client(dbConfig);
 
@@ -35,7 +56,6 @@ exports.handler = (event, context, callback) => {
                 headers: {
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Headers": "*",
-                    "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT"
                 }
             };
             callback(null, response);

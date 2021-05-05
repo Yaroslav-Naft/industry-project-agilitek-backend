@@ -1,0 +1,37 @@
+{
+  "StartAt": "GetActiveWorkflows",
+  "States": {
+    "GetActiveWorkflows": {
+      "Type": "Task",
+      "Resource": "getActiveWorkflows",
+      "Next": "IterateWorkflows"
+    },
+    "IterateWorkflows": {
+      "Type": "Map",
+      "InputPath": "$",
+      "ItemsPath": "$.workflows",
+      "MaxConcurrency": 0,
+      "Iterator": {
+        "StartAt": "ExecuteWorkflowQueries",
+        "States": {
+          "ExecuteWorkflowQueries": {
+            "Type": "Task",
+            "Resource": "executeWorkflowQuery",
+            "Next": "TriggerSalesforceFlow"
+          },
+          "TriggerSalesforceFlow": {
+            "Type": "Task",
+            "Resource": "triggerSalesforceFlow",
+            "Next": "Complete"
+          },
+          "Complete": {
+            "Type": "Pass",
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$",
+      "End": true
+    }
+  }
+}

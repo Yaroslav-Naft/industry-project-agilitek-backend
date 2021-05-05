@@ -3,15 +3,8 @@ const fetch = require('node-fetch');
 const { Client } = require('pg');
 const { dbConfig } = require('/opt/config');
 
-exports.handler = async (event) => {
-    const {
-        flowUrl,
-        resultSet,
-        workflowId,
-        label,
-        type,
-        sObjectType,
-    } = event.iterator;
+exports.handler = async(event) => {
+    const { flowUrl, resultSet, workflowId, label, type, sObjectType } = event;
     var input;
 
     try {
@@ -23,7 +16,7 @@ exports.handler = async (event) => {
         // TRUE: Set sObjectType variable
         // FALSE: Set result variable to the Id string
         if (resultSet.length > 0) {
-            if (type === 'SOBJECT') {
+            if (type === "SOBJECT") {
                 // Check if the resultSet has more than one item
                 // TRUE: set the result to an array of objects with attributes
                 // field and all the columns from the SalesforceContacts
@@ -33,36 +26,36 @@ exports.handler = async (event) => {
                 if (resultSet.length > 1) {
                     input = [];
 
-                    resultSet.forEach((result) => {
+                    resultSet.forEach(result => {
                         input.push({
-                            attributes: { type: sObjectType },
-                            ...result,
+                            "attributes": { "type": sObjectType },
+                            ...result
                         });
                     });
-                } else {
+
+                }
+                else {
                     input = {
-                        attributes: { type: sObjectType },
-                        ...resultSet[0],
+                        "attributes": { "type": sObjectType },
+                        ...resultSet[0]
                     };
                 }
-            } else {
+            }
+            else {
                 input = resultSet[0].Id;
             }
             // Post request to Salesforce API
             const postResponse = await fetch(
-                `${process.env.INSTANCE_URL}${flowUrl}`,
-                {
+                `${process.env.INSTANCE_URL}${flowUrl}`, {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${OAuthData.access_token}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        inputs: [
-                            {
-                                [label]: input,
-                            },
-                        ],
+                        inputs: [{
+                            [label]: input
+                        }],
                     }),
                 }
             );
@@ -74,7 +67,8 @@ exports.handler = async (event) => {
         }
 
         return event;
-    } catch (error) {
+    }
+    catch (error) {
         throw Error(`Error while requesting Salesforce API: ${error}`);
     }
 };
@@ -82,19 +76,10 @@ exports.handler = async (event) => {
 // Should maybe break this logic up into a separate lambda.
 async function insertWorkflowLog(responseData, workflowId) {
     const actionName = responseData[0].actionName;
-    let recordId;
-    let query;
-
-    if (responseData[0].outputValues !== null) {
-        recordId = responseData[0].outputValues.recordId;
-        query = `
-            insert into workflow_logs (workflow_id, action_name, time_of_completion, record_id) 
-            values (${workflowId}, '${actionName}', current_timestamp, ${recordId});`;
-    } else {
-        query = `
-            insert into workflow_logs (workflow_id, action_name, time_of_completion) 
-            values (${workflowId}, '${actionName}', current_timestamp);`;
-    }
+    const isSuccessful = responseData[0].isSuccess;
+    const query = `
+            insert into workflow_logs (workflow_id, action_name, time_of_completion, is_flow_successful) 
+            values (${workflowId}, '${actionName}', current_timestamp, ${isSuccessful});`;
 
     const client = new Client(dbConfig);
 
