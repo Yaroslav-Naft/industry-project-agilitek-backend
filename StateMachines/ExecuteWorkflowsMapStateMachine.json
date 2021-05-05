@@ -3,7 +3,7 @@
   "States": {
     "GetActiveWorkflows": {
       "Type": "Task",
-      "Resource": "arn:aws:lambda:us-east-1:355997568456:function:getActiveWorkflows",
+      "Resource": "getActiveWorkflows",
       "Next": "IterateWorkflows"
     },
     "IterateWorkflows": {
@@ -16,12 +16,12 @@
         "States": {
           "ExecuteWorkflowQueries": {
             "Type": "Task",
-            "Resource": "arn:aws:lambda:us-east-1:355997568456:function:executeWorkflowQuery",
+            "Resource": "executeWorkflowQuery",
             "Next": "TriggerSalesforceFlow"
           },
           "TriggerSalesforceFlow": {
             "Type": "Task",
-            "Resource": "arn:aws:lambda:us-east-1:355997568456:function:triggerSalesforceFlow",
+            "Resource": "triggerSalesforceFlow",
             "Next": "Complete"
           },
           "Complete": {
