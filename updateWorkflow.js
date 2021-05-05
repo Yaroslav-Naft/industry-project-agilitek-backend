@@ -10,9 +10,16 @@ exports.handler = (event, context, callback) => {
         SET 
             name = '${body.name}',
             flow_url = '${body.flowUrl}',
-            sql_query = '${body.query}',
             description = '${body.desc}',
-            active = ${body.active}
+            active = ${body.active},
+            run_again = ${body.runAgain},
+            "table" = '${body.table}',
+            "column" = '${body.column}',
+            "label" = '${body.label}',
+            "type" = '${body.type}',
+            sobject_type = '${body.sObjectType}',
+            where_clause = '${body.whereClause}',
+            "mapping" = '${JSON.stringify(body.mapping)}'
         WHERE id = ${event.pathParameters.id};
         `;
 
