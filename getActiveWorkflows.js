@@ -27,12 +27,7 @@ exports.handler = (event, context, callback) => {
                 workflows.push(row);
             });
             
-           const response = {
-               statuseCode: 200,
-               body: workflows
-           };
-           
-           callback(null, response);
+           callback(null, { workflows });
            client.end();
         }
     });
