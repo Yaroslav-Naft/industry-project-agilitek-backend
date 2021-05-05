@@ -1,4 +1,4 @@
-`drop table if exists workflow_logs, contact_workflows, workflows;
+drop table if exists workflow_logs, contact_workflows, workflows;
 
 create table workflows(
 	id serial primary key not null,
@@ -33,4 +33,4 @@ create table workflow_logs(
 	constraint fk_workflow
 		foreign key(workflow_id)
 			references workflows(id) on delete cascade
-);`
+);
