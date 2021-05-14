@@ -5,8 +5,9 @@ exports.handler = (event, context, callback) => {
     const query = `
         SELECT * 
         FROM workflows 
-        WHERE id = ${event.pathParameters.id}
+        WHERE id = ${event.pathParameters.id};
         `;
+        
     var statusCode = 200;
     var resBody = {};
 
@@ -21,14 +22,16 @@ exports.handler = (event, context, callback) => {
     client.query(query, (err, res) => {
         if (err) {
             callback(err);
-        } else {
+        }
+        else {
             // Check if the data exists in the database
             if (res.rows[0]) {
                 resBody = res.rows[0];
-            } else {
+            }
+            else {
                 statusCode = 404;
                 resBody = {
-                    errorMessage: 'Data source not found',
+                    errorMessage: "Data source not found"
                 };
             }
 
@@ -40,9 +43,10 @@ exports.handler = (event, context, callback) => {
                     'Access-Control-Allow-Headers': '*',
                 },
             };
-
+            // result.workflow_response = response
             callback(null, response);
             client.end();
+            
         }
     });
 };
