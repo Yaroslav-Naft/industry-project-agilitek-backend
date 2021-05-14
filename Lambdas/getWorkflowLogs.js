@@ -4,7 +4,7 @@ const { dbConfig } = require('/opt/config');
 exports.handler = (event, context, callback) => {
     
     const logs = `select * from workflow_logs wl 
-    where workflow_id = ${event.pathParameters.id};`    
+    where workflow_id = ${event.pathParameters.id};`;    
         
     var statusCode = 200;
     var resBody = [];
@@ -25,14 +25,14 @@ exports.handler = (event, context, callback) => {
             // Check if the data exists in the database
             if (res.rows) {
             for (let i = 0; i < res.rows.length; i++) {
-                resBody.push(res.rows[i])
+                resBody.push(res.rows[i]);
             }
             }
             else {
                 statusCode = 404;
                 resBody = {
                     errorMessage: "Data source not found"
-                }
+                };
             }
 
             const response = {

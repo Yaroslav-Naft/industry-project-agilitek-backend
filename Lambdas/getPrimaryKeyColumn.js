@@ -2,14 +2,13 @@ const { Client } = require('pg');
 const { dbConfig } = require('/opt/config');
 
 exports.handler = (event, context, callback) => {
-    const query = `
-        SELECT * 
-        FROM workflows 
-        WHERE id = ${event.pathParameters.id};
-        `;
-        
-    var statusCode = 200;
-    var resBody = {};
+    const query = `SELECT c.column_name
+	               FROM information_schema.table_constraints tc 
+	                    JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) 
+	                    JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
+	               AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
+	               WHERE constraint_type = 'PRIMARY KEY' and tc.table_name = '${event.pathParameters.table_name}'
+                   `;
 
     const client = new Client(dbConfig);
 
@@ -24,29 +23,17 @@ exports.handler = (event, context, callback) => {
             callback(err);
         }
         else {
-            // Check if the data exists in the database
-            if (res.rows[0]) {
-                resBody = res.rows[0];
-            }
-            else {
-                statusCode = 404;
-                resBody = {
-                    errorMessage: "Data source not found"
-                };
-            }
-
             const response = {
-                statusCode,
-                body: JSON.stringify(resBody),
+                statusCode: 200,
+                body: JSON.stringify(res.rows),
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Headers': '*',
                 },
             };
-            // result.workflow_response = response
+
             callback(null, response);
             client.end();
-            
         }
     });
 };
