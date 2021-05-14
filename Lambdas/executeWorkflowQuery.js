@@ -14,7 +14,8 @@ exports.handler = async(event, context, callback) => {
         type,
         label,
         run_again,
-        pk_column
+        pk_column, 
+        first_run
     } = event;
 
     let query;
@@ -54,9 +55,9 @@ exports.handler = async(event, context, callback) => {
         queryResponse = await client.query(query);
     }
     else {
-        const checkContactWorkflows = await client.query('select * from contact_workflows');
+        //const checkContactWorkflows = await client.query('select * from contact_workflows');
 
-        if (checkContactWorkflows.rows.length > 0) {
+        if (!first_run) {
             queryResponse = await client.query(`select ${columns}
                                                 from "${table}"
                                                 where ${where_clause}
@@ -68,6 +69,9 @@ exports.handler = async(event, context, callback) => {
             queryResponse = await client.query(query);
         }
     }
+    
+    // Update first_run column of current wor to false
+    await client.query( `update workflows set first_run = false where id = ${id}` )
 
     let resultSet = queryResponse.rows;
 
